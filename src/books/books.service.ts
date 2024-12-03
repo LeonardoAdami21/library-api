@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -9,11 +11,13 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { Repository } from 'typeorm';
+import { AuthorsService } from '../authors/authors.service';
 
 @Injectable()
 export class BooksService {
   constructor(
     @InjectRepository(Book) private readonly bookRepository: Repository<Book>,
+    @Inject(forwardRef(() => AuthorsService)) private readonly authorsService: AuthorsService
   ) {}
 
   async create(dto: CreateBookDto) {
@@ -38,7 +42,9 @@ export class BooksService {
 
   async findAll() {
     try {
-      const books = await this.bookRepository.find();
+      const books = await this.bookRepository.find({
+        relations: ['authors'],
+      });
       return books;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
@@ -76,6 +82,25 @@ export class BooksService {
     return {
       message: 'Book updated successfully',
     };
+  }
+
+  async addAuthorToBook(bookId: number, authorId: number) {
+    try {
+      const book = await this.bookRepository.findOne({ where: { id: bookId } });
+      if (!book) {
+        throw new NotFoundException('Book not found');
+      }
+      const author = await this.authorsService.findOne(authorId);
+      if (!author) {
+        throw new NotFoundException('Author not found');
+      }
+      await this.bookRepository.update(bookId, {authors: {...book.authors, ...author}});
+      return {
+        message: 'Author added to book successfully',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async remove(id: number) {

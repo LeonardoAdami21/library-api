@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { AuthorsService } from './authors.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
@@ -19,6 +20,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { UpdateAuthorBooksDto } from './dto/update-author-books.dto';
 
 @Controller('authors')
 @ApiTags('Authors')
@@ -78,6 +80,18 @@ export class AuthorsController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAuthorDto: UpdateAuthorDto) {
     return this.authorsService.update(+id, updateAuthorDto);
+  }
+
+  @ApiOperation({ summary: 'Update an author' })
+  @ApiOkResponse({
+    description: 'The author has been successfully updated.',
+  })
+  @ApiBadRequestResponse({ description: 'name and birthDate are required' })
+  @ApiNotFoundResponse({ description: 'Author not found' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @Put(':id/books')
+  updateAuthorBooks(@Param('id') id: string, @Body() updateAuthorDto: UpdateAuthorBooksDto) {
+    return this.authorsService.updateAuthorBooks(+id, updateAuthorDto);
   }
 
   @ApiOperation({ summary: 'Delete an author' })
