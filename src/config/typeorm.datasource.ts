@@ -1,12 +1,11 @@
-import { DataSource, DataSourceOptions } from 'typeorm';
+import {
+  TypeOrmModuleAsyncOptions,
+  TypeOrmModuleOptions,
+} from '@nestjs/typeorm';
 
-const dataSourceOptions: DataSourceOptions = {
+export const dataSourceOptions: TypeOrmModuleOptions = {
   type: 'sqlite',
   database: './db.sqlite',
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: false,
-  logging: true,
-  migrationsTransactionMode: 'each',
+  entities: [__dirname + '/../**/*.entity.{js,ts}'],
+  synchronize: true,
 };
-
-export const dataSource = new DataSource(dataSourceOptions);
