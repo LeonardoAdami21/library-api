@@ -1,14 +1,14 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Book } from '../books/entities/book.entity';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Author } from './entities/author.entity';
 
 @Injectable()
@@ -16,6 +16,8 @@ export class AuthorsService {
   constructor(
     @InjectRepository(Author)
     private readonly authorsRepository: Repository<Author>,
+    @InjectRepository(Book)
+    private readonly bookRepository: Repository<Book>,
   ) {}
 
   async create(dto: CreateAuthorDto) {
@@ -82,6 +84,33 @@ export class AuthorsService {
       return {
         message: 'Author updated successfully',
       };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async updateAuthorBooks(id: number, dto: { name: string; birthDate: string; books: Partial<Book>[] }) {
+    try {
+      const author = await this.authorsRepository.findOne({ where: { id: id }, relations: ['books'] });
+      if (!author) {
+        throw new NotFoundException('Author not found');
+      }
+      author.name = dto.name ?? author.name;
+      author.birthDate = dto.birthDate ?? author.birthDate;
+      const updateBooks = dto.books.map((book) => {
+        if (book.id) {
+          const existingBook = author.books.find((b) => b.id === book.id);
+          if (existingBook) {
+            return {...existingBook, ...book};
+          }
+          return this.bookRepository.create({...updateBooks, author});
+        }
+      })
+      author.books = updateBooks;
+      await this.authorsRepository.save(author);
+      return {
+        message: 'Author updated successfully',
+      }
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
