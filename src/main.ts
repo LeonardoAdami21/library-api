@@ -5,7 +5,9 @@ import { appPort } from './env/envoriment';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin: '*',
+  });
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Library API')
