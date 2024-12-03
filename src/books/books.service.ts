@@ -17,7 +17,8 @@ import { AuthorsService } from '../authors/authors.service';
 export class BooksService {
   constructor(
     @InjectRepository(Book) private readonly bookRepository: Repository<Book>,
-    @Inject(forwardRef(() => AuthorsService)) private readonly authorsService: AuthorsService
+    @Inject(forwardRef(() => AuthorsService))
+    private readonly authorsService: AuthorsService,
   ) {}
 
   async create(dto: CreateBookDto) {
@@ -28,10 +29,19 @@ export class BooksService {
           'title, description and publicationDate are required',
         );
       }
+
+      const author = await this.authorsService.findOne(dto.authorId);
+      if (!author) {
+        throw new NotFoundException('Author not found');
+      }
+
       const book = this.bookRepository.create({
         title,
         description,
         publicationDate,
+        authors: {
+          id: author.id,
+        },
       });
       await this.bookRepository.save(book);
       return book;
@@ -53,7 +63,10 @@ export class BooksService {
 
   async findOne(id: number) {
     try {
-      const book = await this.bookRepository.findOne({ where: { id: id }, relations: ['authors'] });
+      const book = await this.bookRepository.findOne({
+        where: { id: id },
+        relations: ['authors'],
+      });
       if (!book) {
         throw new NotFoundException('Book not found');
       }
@@ -82,25 +95,6 @@ export class BooksService {
     return {
       message: 'Book updated successfully',
     };
-  }
-
-  async addAuthorToBook(bookId: number, authorId: number) {
-    try {
-      const book = await this.bookRepository.findOne({ where: { id: bookId } });
-      if (!book) {
-        throw new NotFoundException('Book not found');
-      }
-      const author = await this.authorsService.findOne(authorId);
-      if (!author) {
-        throw new NotFoundException('Author not found');
-      }
-      await this.bookRepository.update(bookId, {authors: {...book.authors, ...author}});
-      return {
-        message: 'Author added to book successfully',
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
-    }
   }
 
   async remove(id: number) {

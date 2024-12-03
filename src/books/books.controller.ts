@@ -75,19 +75,6 @@ export class BooksController {
     return this.booksService.update(+id, updateBookDto);
   }
 
-  @ApiOperation({ summary: 'Add author to book by id' })
-  @ApiParam({ name: 'bookId', description: 'Book ID', type: Number })
-  @ApiParam({ name: 'authorId', description: 'Author ID', type: Number })
-  @ApiOkResponse({
-    description: 'The author has been successfully added to the book.',
-  })
-  @ApiNotFoundResponse({ description: 'Book or author not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  @Put(':bookId/authors/:authorId')
-  addAuthorToBook(@Param('bookId') bookId: number, @Param('authorId') authorId: number) {
-    return this.booksService.addAuthorToBook(+bookId, +authorId);
-  }
-
   @ApiOperation({ summary: 'Delete book by id' })
   @ApiOkResponse({
     description: 'The book has been successfully deleted.',

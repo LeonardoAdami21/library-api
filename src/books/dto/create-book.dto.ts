@@ -22,4 +22,12 @@ export class CreateBookDto {
     description: 'The publication date of the book',
   })
   publicationDate: string;
+
+  @ApiProperty({
+    type: Number,
+    required: true,
+    description: 'The ID of the author',
+  })
+  authorId?: number
+
 }
