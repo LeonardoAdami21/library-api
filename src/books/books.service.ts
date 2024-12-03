@@ -77,7 +77,7 @@ export class BooksService {
   }
 
   async update(id: number, dto: UpdateBookDto) {
-    const { title, description, publicationDate } = dto;
+    const { title, description, publicationDate, authorId } = dto;
     if (!title || !description || !publicationDate) {
       throw new BadRequestException(
         'title, description and publicationDate are required',
@@ -91,6 +91,9 @@ export class BooksService {
       title,
       description,
       publicationDate,
+      authors: {
+        id: authorId,
+      },
     });
     return {
       message: 'Book updated successfully',

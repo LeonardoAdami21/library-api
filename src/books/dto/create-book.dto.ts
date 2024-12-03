@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsOptional } from 'class-validator';
 
 export class CreateBookDto {
   @ApiProperty({
@@ -28,6 +29,8 @@ export class CreateBookDto {
     required: true,
     description: 'The ID of the author',
   })
+  @IsNumber()
+  @IsOptional()
   authorId?: number
 
 }

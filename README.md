@@ -32,6 +32,12 @@
 $ yarn install
 ```
 
+## Environment Variables
+
+```bash
+$ APP_PORT=3000 // Example
+```
+
 ## Running the app
 
 ```bash
@@ -43,7 +49,7 @@ $ yarn run start:dev
 
 # production mode
 $ yarn run start:prod
-```
+````
 
 ## Test
 
